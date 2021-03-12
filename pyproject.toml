@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "tap-tableau-wrangler"
+version = "0.0.1"
+description = "A collection of tools for working with Tableau Server."
+authors = ["Ken Payne <ken@tails.com>"]
+license = "Apache v2"
+packages = [{ include = "tap_tableau_wrangler" }, {include = "tableau_wrangler"}]
+include = ["tap_tableau_wrangler/schemas/*.json"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+requests = "^2.25.1"
+# Note: Until we clear the first non-prerelease, `singer-sdk` need to be pinned to a specific version.
+#       For a list of released versions: https://pypi.org/project/singer-sdk/#history
+#       To safely update the version number: `poetry add singer-sdk==0.0.2-dev.1068770959`
+singer-sdk = "0.0.2.dev1084532257"
+tableauserverclient = "^0.15.0"
+tableaudocumentapi = { git = "https://github.com/tailsdotcom/document-api-python.git", branch = "master"}
+sqlfluff = "^0.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+# CLI declaration
+tap-tableau-wrangler = 'tap_tableau_wrangler.tap:cli'
