@@ -52,9 +52,6 @@ class TapTailsTableauWrangler(Tap):
         """Return a list of discovered streams."""
         return [stream_class(tap=self) for stream_class in STREAM_TYPES]
 
-    def load_streams(self) -> List[Stream]:
-        return self.discover_streams()
-
     def sync_all(self):
         """Sync all streams."""
         stream_names = self.streams.keys()
