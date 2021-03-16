@@ -27,36 +27,32 @@ from tableau_wrangler import TableauWorkbookService, TableauServerClient
 SCHEMAS_DIR = Path("./tap_tableau_wrangler/schemas")
 
 
-class TableauWranglerStream(Stream):
+class TableauWorkbookFile(Stream):
     """ Base Stream.
     """
 
     def __init__(
         self,
         tap: TapBaseClass,
+        tableau_service: TableauWorkbookService,
         name: Optional[str] = None,
         schema: Optional[Union[Dict[str, Any], Schema]] = None
     ):
         """Initialize stream."""
         super().__init__(name=name, schema=schema, tap=tap)
-        self._service = None
+        self._tablea_service = tableau_service
 
     @property
-    def service(self):
-        if self._service:
-            return self._service
-        else:
-            raise ValueError(
-                "Service not set. Please set TableauWranglerStream.service "
-                "to an initialised TableauWorkbookService instance."
-            )
+    def tableau_service(self):
+        return self._tablea_service
 
-    @service.setter
-    def service(self, service: TableauWorkbookService):
-        self._service = service
+    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
+        attr = self.service_attr or self.name
+        for row in getattr(self.tableau_service, attr, []):
+            yield row
 
 
-class Workbook(TableauWranglerStream):
+class Workbook(TableauWorkbookFile):
     """ Tableau Workbooks
     """
 
@@ -64,13 +60,29 @@ class Workbook(TableauWranglerStream):
     primary_keys = ['id']
     replication_key = 'updated_at'
     schema_filepath = SCHEMAS_DIR / 'workbook.json'
+    service_attr = 'workbooks'
+
+
+class WorkbookDeletion(TableauWorkbookFile):
+    """ Deleted workbooks.
+    """
+
+    name = 'workbook_deletion'
+    primary_keys = ['wb_id']
+    schema_filepath = SCHEMAS_DIR / 'workbook_deletion.json'
 
     def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        for row in self.service.workbooks:
+        state_dict = self.get_stream_or_partition_state(partition)
+        bookmark = state_dict.get('workbook_ids', [])
+        new_bookmark, workbook_deletions = (
+            self.tableau_service.get_deleted_workbooks(bookmark)
+        )
+        for row in workbook_deletions:
             yield row
+        state_dict.update({'workbook_ids': new_bookmark})
 
 
-class WorkbookDatasource(TableauWranglerStream):
+class WorkbookDatasource(TableauWorkbookFile):
     """ Tableau Workbook Datasources
     """
 
@@ -78,13 +90,10 @@ class WorkbookDatasource(TableauWranglerStream):
     primary_keys = ['id']
     replication_key = 'updated_at'
     schema_filepath = SCHEMAS_DIR / 'workbook_datasource.json'
-
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        for row in self.service.datasources:
-            yield row
+    service_attr = 'workbook_datasources'
 
 
-class WorkbookConnection(TableauWranglerStream):
+class WorkbookConnection(TableauWorkbookFile):
     """ Tableau Workbook Connections
     """
 
@@ -92,13 +101,10 @@ class WorkbookConnection(TableauWranglerStream):
     primary_keys = ['id']
     replication_key = 'updated_at'
     schema_filepath = SCHEMAS_DIR / 'workbook_connection.json'
-
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        for row in self.service.connections:
-            yield row
+    service_attr = 'workbook_connections'
 
 
-class WorkbookRelation(TableauWranglerStream):
+class WorkbookRelation(TableauWorkbookFile):
     """ Tableau Workbook Relations
     """
 
@@ -106,13 +112,10 @@ class WorkbookRelation(TableauWranglerStream):
     primary_keys = ['id']
     replication_key = 'updated_at'
     schema_filepath = SCHEMAS_DIR / 'workbook_relation.json'
-
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        for row in self.service.relations:
-            yield row
+    service_attr = 'workbook_relations'
 
 
-class WorkbookTableReference(TableauWranglerStream):
+class WorkbookTableReference(TableauWorkbookFile):
     """ Tableau Workbook Table References
     """
 
@@ -120,7 +123,4 @@ class WorkbookTableReference(TableauWranglerStream):
     primary_keys = ['id']
     replication_key = 'updated_at'
     schema_filepath = SCHEMAS_DIR / 'workbook_table_reference.json'
-
-    def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        for row in self.service.table_references:
-            yield row
+    service_attr = 'workbook_table_references'

@@ -18,24 +18,19 @@ from singer_sdk.helpers.typing import (
 )
 
 from tap_tableau_wrangler.streams import (
-    Workbook, WorkbookDatasource, WorkbookConnection, WorkbookRelation,
-    WorkbookTableReference
+    Workbook, WorkbookDeletion, WorkbookDatasource, WorkbookConnection,
+    WorkbookRelation, WorkbookTableReference
 )
 from tableau_wrangler import TableauServerClient, TableauWorkbookService
 
 
 PLUGIN_NAME = "tap-tableau-wrangler"
-
-STREAM_TYPES = [
-    Workbook, WorkbookDatasource, WorkbookConnection, WorkbookRelation,
-    WorkbookTableReference
+WORKBOOK_FILE_STREAM_TYPES = [
+    Workbook, WorkbookDatasource, WorkbookConnection,
+    WorkbookRelation, WorkbookTableReference, WorkbookDeletion
 ]
-
-WORKBOOK_FILE_STREAMS = [
-    'workbook', 'workbook_datasource', 'workbook_connection',
-    'workbook_relation', 'workbook_table_reference'
-]
-
+OTHER_STREAM_TYPES = []
+STREAM_TYPES = WORKBOOK_FILE_STREAM_TYPES + OTHER_STREAM_TYPES
 
 class TapTailsTableauWrangler(Tap):
     """TailsTableauWrangler tap class."""
@@ -45,39 +40,39 @@ class TapTailsTableauWrangler(Tap):
         Property("host", StringType, required=True),
         Property("username", StringType, required=True),
         Property("password", StringType, required=True),
-        Property("batch_size", IntegerType),  # TODO: add default of -1
+        Property("batch_size", IntegerType, default=50)
     ).to_dict()
+    _tablea_service = None
 
-    def discover_streams(self) -> List[Stream]:
-        """Return a list of discovered streams."""
-        return [stream_class(tap=self) for stream_class in STREAM_TYPES]
-
-    def sync_all(self):
-        """Sync all streams."""
-        stream_names = self.streams.keys()
-        requires_workbook_service = any(
-            stream in stream_names for stream in WORKBOOK_FILE_STREAMS
-        )
-        if requires_workbook_service:
-            checkpoint = None
-            if 'workbook' in stream_names:
-                wb_state = get_stream_state_dict(self.state, 'workbook')
-                checkpoint = wb_state.get('bookmark')
+    @property
+    def tableau_service(self):
+        if self._tablea_service is None:
+            wb_state = get_stream_state_dict(self.state, 'workbook')
+            checkpoint = wb_state.get('bookmark', {}).get('updated_at')
             client = TableauServerClient(
                 host=self.config['host'],
                 username=self.config['username'],
                 password=self.config['password']
             )
-            # This actually does the work to download Workbooks
-            service = TableauWorkbookService(client=client)
-            service.initialise(
-                checkpoint=checkpoint, limit=self.config.get('batch_size', 50)
+            self._tablea_service = TableauWorkbookService(
+                client=client, checkpoint=checkpoint, limit=self.config['batch_size'],
+                relation_types_exclude=['join']
             )
-        # Sync Streams
-        for stream in self.streams.values():
-            if stream.name in WORKBOOK_FILE_STREAMS:
-                stream.service = service
-            stream.sync()
+        return self._tablea_service
+
+    def discover_streams(self) -> List[Stream]:
+        """Return a list of discovered streams."""
+        streams = []
+        streams.extend(
+            [
+                stream_class(tap=self, tableau_service=self.tableau_service)
+                for stream_class in WORKBOOK_FILE_STREAM_TYPES
+            ]
+        )
+        streams.extend(
+            [stream_class(tap=self) for stream_class in OTHER_STREAM_TYPES]
+        )
+        return streams
 
 # CLI Execution:
 cli = TapTailsTableauWrangler.cli

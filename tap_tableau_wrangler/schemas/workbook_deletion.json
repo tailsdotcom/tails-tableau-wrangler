@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "wb_id": {
+      "type": "string"
+    },
+    "deleted_at": {
+      "type": "date-time"
+    }
+  },
+  "required": [
+    "wb_id",
+    "deleted_at"
+  ]
+}

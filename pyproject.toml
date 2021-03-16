@@ -13,7 +13,8 @@ requests = "^2.25.1"
 # Note: Until we clear the first non-prerelease, `singer-sdk` need to be pinned to a specific version.
 #       For a list of released versions: https://pypi.org/project/singer-sdk/#history
 #       To safely update the version number: `poetry add singer-sdk==0.0.2-dev.1068770959`
-singer-sdk = "0.0.2.dev1084532257"
+# singer-sdk = "0.0.2.dev1084532257"
+singer-sdk = { path = "../singer-sdk/" , develop = true }
 tableauserverclient = "^0.15.0"
 tableaudocumentapi = { git = "https://github.com/tailsdotcom/document-api-python.git", branch = "master"}
 sqlfluff = "^0.4.1"

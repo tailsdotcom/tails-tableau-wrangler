@@ -1,6 +1,7 @@
 config.json
 catalog.json
 output_records.jsonl
+state.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
