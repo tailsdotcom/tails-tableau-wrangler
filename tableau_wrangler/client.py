@@ -93,7 +93,7 @@ class TableauServerClient(BaseTableauServerClient):
                 tsc.Filter(
                     tsc.RequestOptions.Field.UpdatedAt,
                     tsc.RequestOptions.Operator.GreaterThanOrEqual,
-                    bookmark
+                    cp
                 )
             )
             # Get filtered id's

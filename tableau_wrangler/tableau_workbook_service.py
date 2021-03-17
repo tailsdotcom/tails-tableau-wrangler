@@ -1,8 +1,12 @@
+import logging
 from typing import List
 from datetime import datetime
 
 from .client import BaseTableauServerClient
 from .local_workbook_extractor import LocalWorkbookExtractor
+
+
+logger = logging.getLogger('tableau_wrangler')
 
 
 class TableauWorkbookService:
@@ -40,7 +44,12 @@ class TableauWorkbookService:
         if not self._is_initialised:
             self._observed_at = datetime.utcnow().isoformat()
             self._remote_workbook_ids = self.client.list_all_workbook_ids()
+            logger.info(f"Listed {len(self._remote_workbook_ids)} workbooks.")
             # Get filtered list of workbook ids
+            if self.checkpoint:
+                logger.info(f"Received checkpoint: {self.checkpoint}")
+            if self.limit:
+                logger.info(f"Received limit: {self.limit}")
             filtered_workbook_ids = self.client.list_workbook_ids(
                 checkpoint=self.checkpoint, limit=self.limit
             )
