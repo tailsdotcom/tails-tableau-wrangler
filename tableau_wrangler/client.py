@@ -3,6 +3,7 @@ import pytz
 import logging
 import tempfile
 from datetime import datetime
+from dateutil.parser import parse
 from typing import Union, List, Iterable
 
 import tableauserverclient as tsc
@@ -87,7 +88,7 @@ class TableauServerClient(BaseTableauServerClient):
             if isinstance(checkpoint, datetime):
                 cp = self.format_checkpoint_datetime(checkpoint)
             else:
-                cp = checkpoint
+                cp = self.format_checkpoint_datetime(parse(checkpoint))
 
             req_option.filter.add(
                 tsc.Filter(

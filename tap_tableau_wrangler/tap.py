@@ -47,8 +47,11 @@ class TapTailsTableauWrangler(Tap):
     @property
     def tableau_service(self):
         if self._tablea_service is None:
-            wb_state = get_stream_state_dict(self.state, 'workbook')
-            checkpoint = wb_state.get('bookmark', {}).get('updated_at')
+            checkpoint = (
+                self.state.get('bookmarks', {})
+                .get('workbook', {})
+                .get('updated_at')
+            )
             client = TableauServerClient(
                 host=self.config['host'],
                 username=self.config['username'],
