@@ -5,7 +5,7 @@ description = "A collection of tools for working with Tableau Server."
 authors = ["Ken Payne <ken@tails.com>"]
 license = "Apache v2"
 packages = [{ include = "tap_tableau_wrangler" }, {include = "tableau_wrangler"}]
-include = ["tap_tableau_wrangler/schemas/*.json"]
+include = ["tap_tableau_wrangler/schemas/*.json*"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
