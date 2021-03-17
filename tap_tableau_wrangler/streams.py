@@ -1,7 +1,6 @@
 """Stream class for tap-tableau-wrangler."""
-
 import requests
-
+import pkg_resources
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, Iterable
@@ -24,7 +23,7 @@ from singer_sdk.helpers.typing import (
 from tableau_wrangler import TableauWorkbookService, TableauServerClient
 
 
-SCHEMAS_DIR = Path("./tap_tableau_wrangler/schemas")
+SCHEMAS_DIR = Path(pkg_resources.resource_filename('tap_tableau_wrangler', 'schemas/'))
 
 
 class TableauWorkbookFile(Stream):
