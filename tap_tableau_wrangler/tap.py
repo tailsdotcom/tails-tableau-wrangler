@@ -18,7 +18,7 @@ from singer_sdk.helpers.typing import (
 )
 
 from tap_tableau_wrangler.streams import (
-    Workbook, WorkbookDeletion, WorkbookDatasource, WorkbookConnection,
+    Workbook, WorkbookIds, WorkbookDatasource, WorkbookConnection,
     WorkbookRelation, WorkbookTableReference
 )
 from tableau_wrangler import TableauServerClient, TableauWorkbookService
@@ -27,7 +27,7 @@ from tableau_wrangler import TableauServerClient, TableauWorkbookService
 PLUGIN_NAME = "tap-tableau-wrangler"
 WORKBOOK_FILE_STREAM_TYPES = [
     Workbook, WorkbookDatasource, WorkbookConnection,
-    WorkbookRelation, WorkbookTableReference, WorkbookDeletion
+    WorkbookRelation, WorkbookTableReference, WorkbookIds
 ]
 OTHER_STREAM_TYPES = []
 STREAM_TYPES = WORKBOOK_FILE_STREAM_TYPES + OTHER_STREAM_TYPES

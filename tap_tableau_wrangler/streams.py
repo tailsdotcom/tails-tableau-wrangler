@@ -62,23 +62,19 @@ class Workbook(TableauWorkbookFile):
     service_attr = 'workbooks'
 
 
-class WorkbookDeletion(TableauWorkbookFile):
-    """ Deleted workbooks.
+class WorkbookIds(TableauWorkbookFile):
+    """ All workbook id's.
     """
 
-    name = 'workbook_deletion'
-    primary_keys = ['wb_id']
-    schema_filepath = SCHEMAS_DIR / 'workbook_deletion.json'
+    name = 'workbook_ids'
+    primary_keys = ['observed_at']
+    schema_filepath = SCHEMAS_DIR / 'workbook_ids.json'
 
     def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
-        state_dict = self.get_stream_or_partition_state(partition)
-        bookmark = state_dict.get('workbook_ids', [])
-        new_bookmark, workbook_deletions = (
-            self.tableau_service.get_deleted_workbooks(bookmark)
-        )
-        for row in workbook_deletions:
-            yield row
-        state_dict.update({'workbook_ids': new_bookmark})
+        yield {
+            'observed_at': self.tableau_service.observed_at,
+            'workbook_ids': self.tableau_service.remote_workbook_ids
+        }
 
 
 class WorkbookDatasource(TableauWorkbookFile):
