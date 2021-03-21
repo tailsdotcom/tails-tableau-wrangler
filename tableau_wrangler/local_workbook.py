@@ -12,7 +12,7 @@ from .utils import json_serial
 WORKBOOKITEM_EXTRACT_ATTRS = [
     'id', 'created_at', 'updated_at', 'name',
     'project_id', 'project_name', 'size', 'tags',
-    'content_url', 'webpage_url'
+    'content_url', 'webpage_url', 'owner_id'
 ]
 WORKBOOK_FILE_EXTRACT_ATTRS = ['filename']
 
