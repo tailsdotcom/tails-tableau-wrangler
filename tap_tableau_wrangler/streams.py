@@ -67,6 +67,7 @@ class WorkbookIds(TableauWorkbookFile):
     """
 
     name = 'workbook_ids'
+    primary_keys = ['observed_at']
     schema_filepath = SCHEMAS_DIR / 'workbook_ids.json'
 
     def get_records(self, partition: Optional[dict]) -> Iterable[Dict[str, Any]]:
