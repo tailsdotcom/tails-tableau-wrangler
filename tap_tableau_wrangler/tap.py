@@ -40,7 +40,8 @@ class TapTailsTableauWrangler(Tap):
         Property("host", StringType, required=True),
         Property("username", StringType, required=True),
         Property("password", StringType, required=True),
-        Property("batch_size", IntegerType, default=50)
+        Property("batch_size", IntegerType, default=50),
+        Property("site_id", StringType, default=''),
     ).to_dict()
     _tablea_service = None
 
@@ -55,7 +56,8 @@ class TapTailsTableauWrangler(Tap):
             client = TableauServerClient(
                 host=self.config['host'],
                 username=self.config['username'],
-                password=self.config['password']
+                password=self.config['password'],
+                site_id=self.config['site_id']
             )
             self._tablea_service = TableauWorkbookService(
                 client=client, checkpoint=checkpoint, limit=self.config['batch_size'],
