@@ -1,4 +1,9 @@
-# Welcome to the tap-tableau-wrangler Singer Tap!
+# ARCHIVED
+
+This repo is deprecated in favour of [tailsdotcom/tap-tableau-server](https://github.com/tailsdotcom/tap-tableau-server), which is refactored to make use of new
+features in the Singer SDK, and is more discoverable (as it conforms to the `tap-<tap_name>` naming convention) 👍
+
+## Welcome to the tap-tableau-wrangler Singer Tap!
 
 Tableau Wrangler was created from a need to better manage our Tableau Server
 instance, in conjunction with other tools in our data stack including [dbt](https://www.getdbt.com/).
